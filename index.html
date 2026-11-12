@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>settle-up — roommates</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>settle-up</h1>
+    <p class="tagline">Track shared costs without the group-chat math.</p>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="roommates-heading">
+      <h2 id="roommates-heading">Roommates</h2>
+
+      <form id="person-form" class="person-form" novalidate>
+        <label for="name-input">Roommate name</label>
+        <div class="input-row">
+          <input
+            id="name-input"
+            name="name"
+            type="text"
+            autocomplete="off"
+            placeholder="e.g. Alex"
+            aria-describedby="name-error">
+          <button type="submit" class="btn-primary">Add</button>
+        </div>
+        <p id="name-error" class="error" hidden></p>
+      </form>
+
+      <p id="roster-empty" class="empty">No roommates yet. Add the first one above.</p>
+      <ul id="roster" class="roster"></ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Saved in this browser only. Nothing leaves your device.</p>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
