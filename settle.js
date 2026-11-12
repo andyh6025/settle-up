@@ -75,3 +75,68 @@ export function computeBalances(people, expenses) {
     };
   });
 }
+
+/**
+ * Greedy settlement plan: repeatedly have the largest debtor pay the largest
+ * creditor. Produces at most (people - 1) transfers, and every balance ends
+ * at zero.
+ *
+ * Ties are broken by name, then id, so the same household always produces the
+ * same plan.
+ *
+ * @param {{ id: string, name: string }[]} people
+ * @param {{ amountCents: number, payerId: string, participantIds: string[] }[]} expenses
+ * @returns {{ fromId: string, fromName: string, toId: string, toName: string, amountCents: number }[]}
+ */
+export function settleUp(people, expenses) {
+  const balances = computeBalances(people, expenses);
+
+  const byAmountThenName = (a, b) =>
+    b.amountCents - a.amountCents ||
+    a.name.localeCompare(b.name) ||
+    a.id.localeCompare(b.id);
+
+  const debtors = balances
+    .filter((balance) => balance.balanceCents < 0)
+    .map((balance) => ({
+      id: balance.id,
+      name: balance.name,
+      amountCents: -balance.balanceCents,
+    }))
+    .sort(byAmountThenName);
+
+  const creditors = balances
+    .filter((balance) => balance.balanceCents > 0)
+    .map((balance) => ({
+      id: balance.id,
+      name: balance.name,
+      amountCents: balance.balanceCents,
+    }))
+    .sort(byAmountThenName);
+
+  const transfers = [];
+  let debtorIndex = 0;
+  let creditorIndex = 0;
+
+  while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
+    const debtor = debtors[debtorIndex];
+    const creditor = creditors[creditorIndex];
+    const amountCents = Math.min(debtor.amountCents, creditor.amountCents);
+
+    transfers.push({
+      fromId: debtor.id,
+      fromName: debtor.name,
+      toId: creditor.id,
+      toName: creditor.name,
+      amountCents,
+    });
+
+    debtor.amountCents -= amountCents;
+    creditor.amountCents -= amountCents;
+
+    if (debtor.amountCents === 0) debtorIndex += 1;
+    if (creditor.amountCents === 0) creditorIndex += 1;
+  }
+
+  return transfers;
+}

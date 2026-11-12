@@ -1,4 +1,4 @@
-import { computeBalances } from './settle.js';
+import { computeBalances, settleUp } from './settle.js';
 
 const STORAGE_KEY = 'settle-up-state';
 
@@ -21,6 +21,8 @@ const els = {
   expenseEmpty: document.querySelector('#expense-empty'),
   balancesList: document.querySelector('#balances-list'),
   balancesEmpty: document.querySelector('#balances-empty'),
+  settleList: document.querySelector('#settle-list'),
+  settleEmpty: document.querySelector('#settle-empty'),
 };
 
 let participantInputs = [];
@@ -255,11 +257,43 @@ function renderBalances() {
   }
 }
 
+function renderSettleUp() {
+  const transfers = settleUp(state.people, state.expenses);
+
+  els.settleList.replaceChildren();
+  els.settleEmpty.hidden = transfers.length > 0;
+
+  if (transfers.length === 0) {
+    els.settleEmpty.textContent =
+      state.expenses.length === 0
+        ? 'Nothing to settle yet.'
+        : 'All settled up.';
+    return;
+  }
+
+  for (const transfer of transfers) {
+    const item = document.createElement('li');
+    item.className = 'transfer-item';
+
+    const text = document.createElement('span');
+    text.className = 'transfer-text';
+    text.textContent = `${transfer.fromName} pays ${transfer.toName}`;
+
+    const amount = document.createElement('span');
+    amount.className = 'transfer-amount';
+    amount.textContent = formatCents(transfer.amountCents);
+
+    item.append(text, amount);
+    els.settleList.append(item);
+  }
+}
+
 function render() {
   renderRoster();
   renderExpenseControls();
   renderExpenses();
   renderBalances();
+  renderSettleUp();
 }
 
 function addPerson(rawName) {
