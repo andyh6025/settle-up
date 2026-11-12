@@ -1,3 +1,5 @@
+import { computeBalances } from './settle.js';
+
 const STORAGE_KEY = 'settle-up-state';
 
 const els = {
@@ -17,6 +19,8 @@ const els = {
   expenseError: document.querySelector('#expense-error'),
   expenseList: document.querySelector('#expense-list'),
   expenseEmpty: document.querySelector('#expense-empty'),
+  balancesList: document.querySelector('#balances-list'),
+  balancesEmpty: document.querySelector('#balances-empty'),
 };
 
 let participantInputs = [];
@@ -212,10 +216,50 @@ function renderExpenses() {
   els.expenseEmpty.hidden = state.expenses.length > 0;
 }
 
+function renderBalances() {
+  const hasExpenses = state.expenses.length > 0;
+  els.balancesList.replaceChildren();
+  els.balancesEmpty.hidden = hasExpenses;
+  if (!hasExpenses) return;
+
+  for (const balance of computeBalances(state.people, state.expenses)) {
+    const item = document.createElement('li');
+    item.className = 'balance-item';
+
+    const name = document.createElement('span');
+    name.className = 'balance-name';
+    name.textContent = balance.name;
+
+    const amount = document.createElement('span');
+    amount.className = 'balance-amount';
+
+    const status = document.createElement('span');
+    status.className = 'balance-status';
+
+    if (balance.balanceCents > 0) {
+      amount.classList.add('positive');
+      amount.textContent = `+${formatCents(balance.balanceCents)}`;
+      status.textContent = 'is owed';
+    } else if (balance.balanceCents < 0) {
+      amount.classList.add('negative');
+      amount.textContent = `-${formatCents(-balance.balanceCents)}`;
+      status.textContent = 'owes';
+    } else {
+      amount.classList.add('settled');
+      amount.textContent = formatCents(0);
+      status.textContent = 'is settled up';
+    }
+
+    item.append(name, amount, status);
+    els.balancesList.append(item);
+  }
+}
+
 function render() {
   renderRoster();
   renderExpenseControls();
   renderExpenses();
+  renderBalances();
 }
 
 function addPerson(rawName) {

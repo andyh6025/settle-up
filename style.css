@@ -8,6 +8,7 @@
   --accent-hover: #1748cc;
   --danger: #b42318;
   --danger-bg: #fef3f2;
+  --positive: #0f7b3f;
   --radius: 10px;
 }
 
@@ -320,6 +321,57 @@ button:focus-visible {
   margin-top: 0.25rem;
 }
 
+.balances {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.balances:empty {
+  display: none;
+}
+
+.balance-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.125rem 0.75rem;
+  align-items: baseline;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.balance-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.balance-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.balance-amount.positive {
+  color: var(--positive);
+}
+
+.balance-amount.negative {
+  color: var(--danger);
+}
+
+.balance-amount.settled {
+  color: var(--muted);
+}
+
+.balance-status {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 @media (min-width: 40rem) {
   body {
     padding: 2.5rem 1.5rem;
@@ -335,5 +387,13 @@ button:focus-visible {
 
   .roster {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .balance-item {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .balance-status {
+    grid-column: auto;
   }
 }
