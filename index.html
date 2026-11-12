@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>settle-up — roommates</title>
+  <title>settle-up</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -33,6 +33,52 @@
 
       <p id="roster-empty" class="empty">No roommates yet. Add the first one above.</p>
       <ul id="roster" class="roster"></ul>
+      <p id="roster-error" class="error" hidden></p>
+    </section>
+
+    <section class="panel" aria-labelledby="expenses-heading">
+      <h2 id="expenses-heading">Expenses</h2>
+
+      <p id="expense-hint" class="hint" hidden>Add a roommate first.</p>
+
+      <form id="expense-form" class="expense-form" novalidate>
+        <fieldset id="expense-fields">
+          <div class="field">
+            <label for="expense-description">Description</label>
+            <input
+              id="expense-description"
+              type="text"
+              autocomplete="off"
+              placeholder="e.g. Groceries">
+          </div>
+
+          <div class="field">
+            <label for="expense-amount">Amount (USD)</label>
+            <input
+              id="expense-amount"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              placeholder="e.g. 42.15">
+          </div>
+
+          <div class="field">
+            <label for="expense-payer">Paid by</label>
+            <select id="expense-payer"></select>
+          </div>
+
+          <fieldset class="participants">
+            <legend>Shared by</legend>
+            <div id="participant-list" class="checks"></div>
+          </fieldset>
+
+          <p id="expense-error" class="error" hidden></p>
+          <button type="submit" class="btn-primary">Add expense</button>
+        </fieldset>
+      </form>
+
+      <p id="expense-empty" class="empty">No expenses yet. Add the first one above.</p>
+      <ul id="expense-list" class="expenses"></ul>
     </section>
   </main>
 
