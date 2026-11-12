@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { computeBalances, splitExpense } from '../settle.js';
+import { computeBalances, settleUp, splitExpense } from '../settle.js';
 
 const people = [
   { id: 'a', name: 'Alex' },
@@ -137,4 +137,86 @@ test('computeBalances keeps roster order and ignores unknown people', () => {
     ['a', 'b', 'c']
   );
   assert.equal(balances[0].balanceCents, 150);
+});
+
+test('settleUp returns one payment for a simple shared expense', () => {
+  const transfers = settleUp(people.slice(0, 2), [
+    { amountCents: 1000, payerId: 'a', participantIds: ['a', 'b'] },
+  ]);
+
+  assert.deepEqual(transfers, [
+    { fromId: 'b', fromName: 'Sam', toId: 'a', toName: 'Alex', amountCents: 500 },
+  ]);
+});
+
+test('settleUp returns nothing when there is nothing to settle', () => {
+  assert.deepEqual(settleUp(people, []), []);
+  assert.deepEqual(
+    settleUp(people.slice(0, 1), [
+      { amountCents: 500, payerId: 'a', participantIds: ['a'] },
+    ]),
+    []
+  );
+});
+
+test('settleUp pays the largest debt to the largest credit first', () => {
+  const transfers = settleUp(people, [
+    { amountCents: 3000, payerId: 'a', participantIds: ['a', 'b', 'c'] },
+    { amountCents: 600, payerId: 'b', participantIds: ['b', 'c'] },
+  ]);
+
+  assert.deepEqual(transfers, [
+    { fromId: 'c', fromName: 'Kim', toId: 'a', toName: 'Alex', amountCents: 1300 },
+    { fromId: 'b', fromName: 'Sam', toId: 'a', toName: 'Alex', amountCents: 700 },
+  ]);
+  assert.equal(
+    transfers.reduce((sum, transfer) => sum + transfer.amountCents, 0),
+    2000,
+    'payments add up to the total debt'
+  );
+});
+
+test('settleUp handles uneven cents without losing a cent', () => {
+  const transfers = settleUp(people, [
+    { amountCents: 1000, payerId: 'a', participantIds: ['a', 'b', 'c'] },
+  ]);
+
+  assert.deepEqual(transfers, [
+    { fromId: 'c', fromName: 'Kim', toId: 'a', toName: 'Alex', amountCents: 333 },
+    { fromId: 'b', fromName: 'Sam', toId: 'a', toName: 'Alex', amountCents: 333 },
+  ]);
+  assert.equal(
+    transfers.reduce((sum, transfer) => sum + transfer.amountCents, 0),
+    666
+  );
+});
+
+test('settleUp uses at most one payment per person', () => {
+  const four = [...people, { id: 'd', name: 'Dee' }];
+  const transfers = settleUp(four, [
+    { amountCents: 4000, payerId: 'a', participantIds: ['a', 'b', 'c', 'd'] },
+  ]);
+
+  assert.equal(transfers.length, 3);
+  assert.ok(transfers.length <= four.length - 1);
+});
+
+test('settleUp is deterministic when amounts tie', () => {
+  const four = [
+    { id: 'a', name: 'Ann' },
+    { id: 'b', name: 'Bob' },
+    { id: 'c', name: 'Cat' },
+    { id: 'd', name: 'Dan' },
+  ];
+
+  const transfers = settleUp(four, [
+    { amountCents: 100, payerId: 'c', participantIds: ['a'] },
+    { amountCents: 100, payerId: 'd', participantIds: ['b'] },
+  ]);
+
+  assert.deepEqual(transfers, [
+    { fromId: 'a', fromName: 'Ann', toId: 'c', toName: 'Cat', amountCents: 100 },
+    { fromId: 'b', fromName: 'Bob', toId: 'd', toName: 'Dan', amountCents: 100 },
+  ]);
+  assert.ok(transfers.every((transfer) => transfer.amountCents > 0));
 });

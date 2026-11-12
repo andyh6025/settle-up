@@ -372,6 +372,38 @@ button:focus-visible {
   color: var(--muted);
 }
 
+.transfers {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transfers:empty {
+  display: none;
+}
+
+.transfer-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.transfer-text {
+  overflow-wrap: anywhere;
+}
+
+.transfer-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 @media (min-width: 40rem) {
   body {
     padding: 2.5rem 1.5rem;
